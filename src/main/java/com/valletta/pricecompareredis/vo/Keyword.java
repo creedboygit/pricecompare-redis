@@ -8,5 +8,5 @@ public class Keyword {
 
     private String keyword;
 
-    private List<ProductGroup> productGrpList;
+    private List<ProductGrp> productGrpList;
 }

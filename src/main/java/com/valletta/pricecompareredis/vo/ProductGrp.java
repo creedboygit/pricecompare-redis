@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ProductGroup {
+public class ProductGrp {
 
     private String prodGrpId;
     private List<Product> productList;

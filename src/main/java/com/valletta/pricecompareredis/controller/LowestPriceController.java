@@ -1,6 +1,7 @@
 package com.valletta.pricecompareredis.controller;
 
 import com.valletta.pricecompareredis.service.LowestPriceService;
+import com.valletta.pricecompareredis.vo.Keyword;
 import com.valletta.pricecompareredis.vo.Product;
 import com.valletta.pricecompareredis.vo.ProductGrp;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class LowestPriceController {
     @Autowired
     private LowestPriceService mlps;
 
-    @GetMapping("/getZSETValue")
+    @GetMapping("/product")
     public Set getZsetValue(String key) {
         return mlps.getZsetValue(key);
     }
@@ -31,5 +32,15 @@ public class LowestPriceController {
     @PutMapping("/productGroup")
     public int SetNewProductGrp(@RequestBody ProductGrp newProductGrp) {
         return mlps.setNewProductGrp(newProductGrp);
+    }
+
+    @PutMapping("/productGrpToKeyword")
+    public int SetNewProductGrpToKeyword(String keyword, String prodGrpId, double score) {
+        return mlps.setNewProductGrpToKeyword(keyword, prodGrpId, score);
+    }
+
+    @GetMapping("/productPrice/lowest")
+    public Keyword getLowestPriceProductByKeyword(String keyword) {
+        return null;
     }
 }

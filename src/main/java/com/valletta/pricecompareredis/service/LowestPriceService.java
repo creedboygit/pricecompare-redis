@@ -11,4 +11,6 @@ public interface LowestPriceService {
     int setNewProduct(Product newProduct);
 
     int setNewProductGrp(ProductGrp newProductGrp);
+
+    int setNewProductGrpToKeyword(String keyword, String prodGrpId, double score);
 }

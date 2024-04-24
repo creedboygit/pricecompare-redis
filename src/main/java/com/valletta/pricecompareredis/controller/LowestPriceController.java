@@ -2,6 +2,7 @@ package com.valletta.pricecompareredis.controller;
 
 import com.valletta.pricecompareredis.service.LowestPriceService;
 import com.valletta.pricecompareredis.vo.Product;
+import com.valletta.pricecompareredis.vo.ProductGrp;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,5 +26,10 @@ public class LowestPriceController {
     @PutMapping("/product")
     public int SetNewProduct(@RequestBody Product newProduct) {
         return mlps.setNewProduct(newProduct);
+    }
+
+    @PutMapping("/productGroup")
+    public int SetNewProductGrp(@RequestBody ProductGrp newProductGrp) {
+        return mlps.setNewProductGrp(newProductGrp);
     }
 }

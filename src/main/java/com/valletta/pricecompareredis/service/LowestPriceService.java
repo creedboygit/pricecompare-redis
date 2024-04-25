@@ -1,5 +1,6 @@
 package com.valletta.pricecompareredis.service;
 
+import com.valletta.pricecompareredis.vo.Keyword;
 import com.valletta.pricecompareredis.vo.Product;
 import com.valletta.pricecompareredis.vo.ProductGrp;
 import java.util.Set;
@@ -13,4 +14,6 @@ public interface LowestPriceService {
     int setNewProductGrp(ProductGrp newProductGrp);
 
     int setNewProductGrpToKeyword(String keyword, String prodGrpId, double score);
+
+    Keyword getLowestPriceProductByKeyword(String keyword);
 }

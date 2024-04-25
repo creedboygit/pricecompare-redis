@@ -1,9 +1,15 @@
 package com.valletta.pricecompareredis.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.valletta.pricecompareredis.vo.Keyword;
 import com.valletta.pricecompareredis.vo.Product;
 import com.valletta.pricecompareredis.vo.ProductGrp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,5 +49,59 @@ public class LowestPriceServiceImpl implements LowestPriceService {
         myProdPriceRedis.opsForZSet().add(keyword, prodGrpId, score);
         int rank = myProdPriceRedis.opsForZSet().rank(keyword, prodGrpId).intValue();
         return rank;
+    }
+
+    public Keyword getLowestPriceProductByKeyword(String keyword) {
+        Keyword returnInfo = new Keyword();
+        List<ProductGrp> tempProductGrp = new ArrayList<>();
+
+        // keyword를 통해 ProductGroup 가져오기 (10개)
+        tempProductGrp = getProductGrpUsingKeyword(keyword);
+
+        // 가져온 정보들을 Return할 Object에 넣기
+        returnInfo.setKeyword(keyword);
+        returnInfo.setProductGrpList(tempProductGrp);
+
+        // 해당 Object return
+        return returnInfo;
+    }
+
+    public List<ProductGrp> getProductGrpUsingKeyword(String keyword) {
+        List<ProductGrp> returnInfo = new ArrayList<>();
+        ProductGrp tempProductGrp = new ProductGrp();
+        // input 받은 keyword 로 productGrpId를 조회
+        List<String> prodGrpIdList = new ArrayList<>();
+        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().range(keyword, 0, 9));
+        Product tempProduct = new Product();
+        List<Product> tempProdList = new ArrayList<>();
+
+        // 10개 prodGrpId로 loop
+        for (final String prodGrpId : prodGrpIdList) {
+
+            // Loop로 ProductGroupId로 Product:price 가져오기 (10개)
+            Set prodAndPriceList = new HashSet();
+            prodAndPriceList = myProdPriceRedis.opsForZSet().rangeWithScores(prodGrpId, 0, 9);
+            Iterator<Object> prodPriceObj = prodAndPriceList.iterator();
+
+            // Loop로 Product Object에 bind (10개)
+            while (prodPriceObj.hasNext()) {
+                ObjectMapper objMapper = new ObjectMapper();
+
+                // {"value":1234}, {"score":10000}
+                Map<String, String> prodPriceMap = objMapper.convertValue(prodPriceObj.next(), Map.class);
+
+                // Product Object에 bind
+                tempProduct.setProductId(prodPriceMap.get("value"));
+                tempProduct.setPrice(Integer.parseInt(prodPriceMap.get("score")));
+                tempProdList.add(tempProduct);
+            }
+
+            // 10개 product price 입력 완료
+            tempProductGrp.setProdGrpId(prodGrpId);
+            tempProductGrp.setProductList(tempProdList);
+            returnInfo.add(tempProductGrp);
+        }
+
+        return returnInfo;
     }
 }

@@ -66,17 +66,21 @@ public class LowestPriceServiceImpl implements LowestPriceService {
         return returnInfo;
     }
 
-    public List<ProductGrp> getProductGrpUsingKeyword(String keyword) {
+    private List<ProductGrp> getProductGrpUsingKeyword(String keyword) {
         List<ProductGrp> returnInfo = new ArrayList<>();
+
         ProductGrp tempProductGrp = new ProductGrp();
+
         // input 받은 keyword 로 productGrpId를 조회
         List<String> prodGrpIdList = new ArrayList<>();
-        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().range(keyword, 0, 9));
-        Product tempProduct = new Product();
+        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().reverseRange(keyword, 0, 9));
+//        Product tempProduct = new Product();
         List<Product> tempProdList = new ArrayList<>();
 
         // 10개 prodGrpId로 loop
         for (final String prodGrpId : prodGrpIdList) {
+
+            ProductGrp tempProdGrp = new ProductGrp();
 
             // Loop로 ProductGroupId로 Product:price 가져오기 (10개)
             Set prodAndPriceList = new HashSet();
@@ -88,11 +92,14 @@ public class LowestPriceServiceImpl implements LowestPriceService {
                 ObjectMapper objMapper = new ObjectMapper();
 
                 // {"value":1234}, {"score":10000}
-                Map<String, String> prodPriceMap = objMapper.convertValue(prodPriceObj.next(), Map.class);
+                Map<String, Object> prodPriceMap = objMapper.convertValue(prodPriceObj.next(), Map.class);
+                Product tempProduct = new Product();
 
                 // Product Object에 bind
-                tempProduct.setProductId(prodPriceMap.get("value"));
-                tempProduct.setPrice(Integer.parseInt(prodPriceMap.get("score")));
+                tempProduct.setProductId(prodPriceMap.get("value").toString());
+                tempProduct.setPrice(Double.valueOf(prodPriceMap.get("score").toString()).intValue());
+                tempProduct.setProdGrpId(prodGrpId);
+
                 tempProdList.add(tempProduct);
             }
 

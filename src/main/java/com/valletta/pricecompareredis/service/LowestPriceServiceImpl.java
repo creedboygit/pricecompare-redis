@@ -2,6 +2,7 @@ package com.valletta.pricecompareredis.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.valletta.pricecompareredis.vo.Keyword;
+import com.valletta.pricecompareredis.vo.NotFoundException;
 import com.valletta.pricecompareredis.vo.Product;
 import com.valletta.pricecompareredis.vo.ProductGrp;
 import java.util.ArrayList;
@@ -9,10 +10,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,15 @@ public class LowestPriceServiceImpl implements LowestPriceService {
     public Set getZsetValue(String key) {
         Set myTempSet = new HashSet();
         myTempSet = myProdPriceRedis.opsForZSet().rangeWithScores(key, 0, 9);
+        return myTempSet;
+    }
+
+    public Set getZsetValueWithStatus(String key) throws Exception {
+        Set myTempSet = new HashSet();
+        myTempSet = myProdPriceRedis.opsForZSet().rangeWithScores(key, 0, 9);
+        if (myTempSet.size() < 1) {
+            throw new Exception("the key doesn't have any member");
+        }
         return myTempSet;
     }
 
@@ -64,6 +74,16 @@ public class LowestPriceServiceImpl implements LowestPriceService {
 
         // 해당 Object return
         return returnInfo;
+    }
+
+    @Override
+    public Set<String> getZsetValueWithSpecificException(String key) throws Exception {
+        Set myTempSet = new HashSet();
+        myTempSet = myProdPriceRedis.opsForZSet().rangeWithScores(key, 0, 9);
+        if (myTempSet.size() < 1) {
+            throw new NotFoundException("the key doesn't exist in redis", HttpStatus.NOT_FOUND);
+        }
+        return myTempSet;
     }
 
     private List<ProductGrp> getProductGrpUsingKeyword(String keyword) {
